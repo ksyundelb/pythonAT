@@ -54,6 +54,7 @@ def test_oop(prepare_test_classes):
     assert result_1 in Teacher.homework_done[first_hw]
 
     assert not second_teacher.check_homework(result_2)
+    print(Teacher.homework_done)
     assert result_2 not in Teacher.homework_done[second_hw]
 
     Teacher.reset_results()

@@ -23,7 +23,6 @@ Check file with tests to see how all these classes are used. You can create any 
 you want.
 """
 import datetime
-from collections import defaultdict
 
 
 class DeadlineError(Exception):
@@ -39,20 +38,27 @@ class Person:
 class Student(Person):
     def do_homework(self, homework, solution):
         if homework.is_active():
-            return HomeworkResult(homework, solution, self)
+            return HomeworkResult(self, homework, solution)
         raise DeadlineError('You are late')
 
 
 class Teacher(Person):
-    homework_done = defaultdict()
+    homework_done = {}
 
-    @staticmethod
-    def create_homework(text, deadline):
-        return Homework(text, deadline)
+    @classmethod
+    def create_homework(cls, text, deadline):
+        homework = Homework(text, deadline)
+        if homework not in cls.homework_done:
+            cls.homework_done[homework] = []
+        return homework
 
-    def check_homework(self, hw_result):
+    @classmethod
+    def check_homework(cls, hw_result):
         if len(hw_result.solution) > 5:
-            self.homework_done[hw_result.homework] = hw_result.solution
+            if hw_result.homework not in cls.homework_done:
+                cls.homework_done[hw_result.homework] = []
+            if hw_result not in cls.homework_done[hw_result.homework]:
+                cls.homework_done[hw_result.homework].append(hw_result)
             return True
         return False
 
@@ -61,12 +67,12 @@ class Teacher(Person):
         if homework:
             del cls.homework_done[homework]
         else:
-            cls.homework_done = defaultdict()
+            cls.homework_done = {}
 
 
 class Homework:
-    def __init__(self, text, deadline):
-        self.text = text
+    def __init__(self, hw_text, deadline):
+        self.hw_text = hw_text
         self.deadline = datetime.timedelta(deadline)
         self.created = datetime.datetime.today()
 
@@ -75,9 +81,7 @@ class Homework:
 
 
 class HomeworkResult:
-    def __init__(self, homework, solution, author):
-        if not isinstance(homework, Homework):
-            raise TypeError('You gave a not Homework object')
+    def __init__(self, author, homework, solution):
         self.homework = homework
         self.solution = solution
         self.author = author
