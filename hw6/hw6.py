@@ -6,13 +6,17 @@ def flatten(items):
             yield x
 
 def merge_elems(*elems):
-    for elem in flatten(elems):
-        yield elem
+    merged = []
+    for elem in elems:
+        if isinstance(elem, str) and len(elem) > 1:
+            elem = list(elem)
+        merged.extend(flatten(elem))
+    return merged
 
 
 def map_like(fun, *elems):
     for elem in elems:
         try:
             yield fun(elem)
-        except TypeError:
-            yield f"{elem}: {type(elem).__name__} object is not subscriptable"
+        except Exception as e:
+            yield f"{elem}: {type(e).__name__} - {str(e)}"
