@@ -6,12 +6,10 @@ def flatten(items):
             yield x
 
 def merge_elems(*elems):
-    merged = []
     for elem in elems:
         if isinstance(elem, str) and len(elem) > 1:
             elem = list(elem)
-        merged.extend(flatten(elem))
-    return merged
+        yield from flatten(elem)
 
 
 def map_like(fun, *elems):
